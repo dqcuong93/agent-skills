@@ -1,0 +1,13 @@
+{
+  "name": "qa",
+  "displayName": "QA/QC",
+  "version": "0.1.0",
+  "description": "QA/QC review skills. Generic workflow + stack checklists; project-specific rules come from .claude/project-profile.md.",
+  "author": {
+    "name": "dqcuong93",
+    "url": "https://github.com/dqcuong93"
+  },
+  "repository": "https://github.com/dqcuong93/agent-skills",
+  "license": "MIT",
+  "keywords": ["qa", "code-review", "checklist", "django", "fastapi", "sqlalchemy", "python"]
+}

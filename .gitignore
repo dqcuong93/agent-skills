@@ -1,0 +1,6 @@
+# memsearch plugin writes session memory into the working directory
+.memsearch/
+
+# local scratch
+.DS_Store
+*.log
