@@ -1,5 +1,7 @@
 # Python stack pack
 
+Written for: Python 3
+
 - [ ] **Version idioms**: Matches the project's Python version. `X | None`, `list[str]`, `dict[str, Any]`; no `Optional`/`Union`/`List`/`Dict` from `typing` on 3.10+. `match/case` where it clarifies branching.
 - [ ] **Return types explicit**: Including `-> None`.
 - [ ] **Lint/format**: `ruff check` and `ruff format --check` (or the project's toolchain) pass on changed files.

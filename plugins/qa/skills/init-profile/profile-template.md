@@ -1,6 +1,7 @@
 ---
-# Stack packs to load. Each key matches a file in a review skill's references/ folder
-# (e.g. review-backend/references/django.md). Unknown keys are ignored.
+# Every stack key the project uses (see stack-signals.md). A key with a pack loads
+# references/<layer>-<key>.md (e.g. backend-django.md → django); a key without one is
+# listed anyway and its rules go under the layer's checks below.
 stacks: []
 ---
 
@@ -10,7 +11,8 @@ stacks: []
 
 ## Layout
 
-<!-- Where each layer lives. Reviews use this to decide which checklist applies to a changed file. -->
+<!-- Where each layer lives, as paths from the repo root. Reviews assign a changed file to the
+     layer whose path contains it; the longest path wins (`frontend/` beats `.`). -->
 - backend:
 - frontend:
 - infra:

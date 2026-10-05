@@ -4,3 +4,6 @@
 # local scratch
 .DS_Store
 *.log
+
+# local list of project/client names that must never be committed (read by scripts/check-plugin.py)
+.banned-words

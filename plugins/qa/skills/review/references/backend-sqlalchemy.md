@@ -1,4 +1,6 @@
-# SQLAlchemy 2.x stack pack
+# SQLAlchemy stack pack
+
+Written for: SQLAlchemy 2
 
 - [ ] **Typed models**: `Mapped[...]` / `mapped_column(...)`; no legacy `Column` declarations in new models.
 - [ ] **Mutation through services**: Fields changed only inside the owning module's service functions, so immutability/append-only rules hold.

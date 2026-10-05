@@ -1,4 +1,4 @@
-# Common backend checklist
+# Backend checklist
 
 Language- and framework-agnostic. Report only items the change affects.
 
@@ -60,6 +60,7 @@ Language- and framework-agnostic. Report only items the change affects.
 
 - [ ] **Runs**: Tests pass with the project's runner (see profile `Commands`).
 - [ ] **Changed critical paths tested**: Auth/permission, state transitions, money/data-integrity paths have explicit tests.
+- [ ] **Tests can fail**: Each new test would fail if the behaviour it covers were removed; an assertion that holds either way proves nothing (WARNING).
 - [ ] **Failure paths**: Not only the happy path — invalid input, blocked/forbidden, external failure, retry/resume.
 - [ ] **Isolation**: Each test owns its data (fixtures/temp dirs); no shared mutable state or writes into the repo.
 - [ ] **Mocks at the edge**: External services/devices mocked; follow the project's rule on whether the DB is real or mocked.

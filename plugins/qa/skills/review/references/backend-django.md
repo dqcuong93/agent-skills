@@ -1,5 +1,7 @@
 # Django / DRF stack pack
 
+Written for: Django 6
+
 ## Models & DB
 - [ ] **Migrations**: Model changes ship with a migration; migration is reversible or explicitly irreversible; no data migration mixed with a large schema change without reason.
 - [ ] **Transactions**: Multi-step writes in `transaction.atomic()`.
@@ -30,6 +32,3 @@
 
 ## Background work
 - [ ] Heavy/slow work offloaded (Celery/RQ/etc.) when available; tasks idempotent and pass ids, not model instances.
-
-## i18n / Vietnamese data
-- [ ] **Slugs for closed sets**: Don't derive keys by stripping diacritics when it causes collisions (e.g. `Tý`/`Tỵ` → `ty`); use explicit `TextChoices` mapping, kept in sync with the frontend.
