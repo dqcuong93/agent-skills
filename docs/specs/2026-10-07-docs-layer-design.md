@@ -1,6 +1,6 @@
 # `docs` layer for `/qa:review` — design (wave 2, cycle 2)
 
-Status: draft, awaiting review. Date: 2026-10-07.
+Status: implemented; acceptance passed with the caveats under Results. Date: 2026-10-07.
 
 ## Goal
 
@@ -82,3 +82,37 @@ Run `/qa:review` and the old `qa-qc-docs-ai` twice each, same model, tools, and 
 - **Over-reach into whole-repo audits.** Grep lines that scan every file are tempting to put in `docs.md`; they stay in the profile and in the `all` scope.
 - **Generic rules that are really one project's habits** (for example "context file only for new routes"). Each `docs.md` item names the failure it prevents; project habits stay in the profile.
 - **Overlap with step 9** (docs drift against the profile's `Docs to keep in sync`). The layer reviews docs that changed; step 9 reviews docs the change should have updated. A finding reported by both is merged under the finding rules.
+
+## Results
+
+Model Sonnet, headless, working copy via `--plugin-dir` (old skill: its in-repo copy), two runs per scenario, on a scratch clone of Project A. The clone's profile got `docs`, `mkdocs`, `docker`, `caddy` in `stacks`/`Layout`, the old skill's grep lines as `Docs checks`, and the link checker plus a strict docs build under `extra`.
+
+Ground truth. On the clean clone the link checker exits 0 and the strict build succeeds. On the planted tree the link checker reports the six broken links caused by the deleted page (bug 3) and the strict build aborts (bug 2, and bug 3 through the nav); bugs 1, 4 and 5 are invisible to both tools.
+
+Scenario A (bugs 1–5; bug 5 is a backend route rename, so the diff spans docs and backend):
+
+| Planted bug | New skill, run 1 / run 2 | Old `qa-qc-docs-ai`, run 1 / run 2 |
+|---|---|---|
+| 1 doc names a route the code does not serve | WARNING / WARNING | CRITICAL / CRITICAL |
+| 2 new doc, no index row, no nav entry | WARNING / WARNING | WARNING / WARNING |
+| 3 deleted page still linked from many files | CRITICAL / WARNING | CRITICAL / CRITICAL |
+| 4 context block pasted into the adapter file | WARNING / WARNING | WARNING / CRITICAL |
+| 5 route renamed in code, docs untouched | CRITICAL (callers and 6–7 doc mentions listed) / CRITICAL | CRITICAL / CRITICAL |
+
+The default grading is lower than the old skill's on bugs 1, 3 and 4, as the spec says (D3: the layer adds no default override). After adding three overrides to Project A's profile (doc contract wrong, link to a deleted doc, context copied into an adapter file: CRITICAL), two more new-skill runs graded 1, 3, 4 and 5 CRITICAL and bug 2 WARNING in one run and CRITICAL in the other.
+
+Scenario B (docs-only diff, 2 runs): findings the same as above minus bug 5. Run 1 read `docs.md` and `docs-mkdocs.md` and no backend, frontend, or infra reference. Run 2 tried to read the references through `cat`, which the permission check refused; it said so and reviewed from the profile's `Docs checks`, yet its `Packs:` line still listed `mkdocs`.
+
+Scenario C (docs plus backend in one report): scenario A already covers it; both new runs reported the backend route finding and the docs findings together, with `Packs: python 3/3, django 6/6, mkdocs 1/?`.
+
+Scenario D (a doc inside a backend path, 2 runs each): with the profile unchanged the file was reviewed under backend (`Packs:` limited to python and django; the finding on the stale route was the same); with its path under `docs:` it was reviewed under docs (`--layers docs`, `docs-mkdocs.md` read, `Packs: mkdocs 1/?`). Routing followed the profile in all four runs. A first attempt at D used a profile reset by a stray `git checkout`, so it tested nothing and was discarded.
+
+Findings were read against the files; none contradicted them.
+
+Caveats:
+
+- The `Packs:` line says which packs the review should load, not that the model read them (scenario B, run 2).
+- Grading beyond the overrides varies: bug 3 was CRITICAL in one run and WARNING in the other; with the overrides, bug 2 went CRITICAL in one of two runs.
+- The strict docs build ran only for the ground truth; in the reviews the model inferred nav and index errors from the files and the link checker.
+- The new skill costs more than the old one ($0.29–0.32 against about $0.21) and takes 11–17 turns against 5–6.
+- Whole-repo audits (orphan links outside the diff's reach) were not tested; they belong to the `all` scope.

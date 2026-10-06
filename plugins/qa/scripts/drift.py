@@ -11,6 +11,7 @@ and reference files. Prints one record per line, then `Packs: ...`. Records neve
 from __future__ import annotations
 
 import argparse
+import datetime
 import fnmatch
 import json
 import re
@@ -21,6 +22,7 @@ SKIP_DIRS = {".git", "node_modules", ".venv", "venv", "__pycache__", "dist", "bu
 FILE_SIGNALS = {
     "docker": ["Dockerfile*", "docker-compose*.yml", "compose*.yaml"],
     "caddy": ["Caddyfile*"],
+    "mkdocs": ["mkdocs.yml"],
 }
 PY_MANIFESTS = ("pyproject.toml", "setup.cfg")
 SPEC = re.compile(r"(?<![<!])(?:==|>=|~=|\^|~|=)?\s*v?(\d+)")
@@ -55,6 +57,37 @@ def read_profile(root: Path) -> tuple[list[str], list[str]]:
             p = entry if entry.endswith("/") or "." not in entry.rsplit("/", 1)[-1] else entry.rsplit("/", 1)[0]
             dirs.append(p.strip("/") or ".")
     return stacks, sorted(set(dirs))
+
+
+def read_meta(root: Path) -> dict:
+    """Return profile lifecycle facts: confirmed, plugin, review_after, roles, filled check sections."""
+    text = (root / ".claude" / "project-profile.md").read_text()
+    front = re.match(r"---\n(.*?)\n---", text, re.S)
+    fm = front.group(1) if front else ""
+
+    def key(name: str) -> str:
+        m = re.search(rf"^{name}:[ \t]*(\S.*)?$", fm, re.M)
+        return (m.group(1) or "").strip() if m else ""
+
+    roles: dict[str, bool] = {}
+    sec = re.search(r"^## Layout\n(.*?)^## ", text, re.S | re.M)
+    for line in (sec.group(1) if sec else "").splitlines():
+        m = re.match(r"-\s*([\w-]+):\s*(.*)$", line.strip())
+        if m and re.sub(r"\([^)]*\)", "", m.group(2)).strip():
+            roles[m.group(1)] = True
+    filled: dict[str, bool] = {}
+    for role in roles:
+        m = re.search(rf"^## {role.capitalize()} checks\n(.*?)(?=^## |\Z)", text, re.S | re.M)
+        body = re.sub(r"<!--.*?-->", "", m.group(1), flags=re.S).strip() if m else ""
+        filled[role] = bool(body)
+    days = key("review-after-days")
+    return {
+        "confirmed": key("confirmed"),
+        "plugin": key("plugin"),
+        "review_after": int(days) if days.isdigit() else 180,
+        "roles": list(roles),
+        "filled": filled,
+    }
 
 
 def read_signals(plugin_root: Path) -> dict[str, tuple[str, set[str]]]:
@@ -196,6 +229,7 @@ def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("root", nargs="?", default=".")
     ap.add_argument("--layers", default="")
+    ap.add_argument("--today", default="")
     ap.add_argument("--plugin-root", default=str(Path(__file__).resolve().parent.parent))
     args = ap.parse_args()
     root = Path(args.root).resolve()
@@ -259,6 +293,29 @@ def main() -> int:
             loaded.append(f"{key} {written}/{proj}")
             if proj != "?" and int(proj) > written:
                 records.append(f"PACK {key} (written for {written}, project uses {proj}): may be stale")
+
+    meta = read_meta(root)
+    today = datetime.date.fromisoformat(args.today) if args.today else datetime.date.today()
+    try:
+        confirmed = datetime.date.fromisoformat(meta["confirmed"])
+    except ValueError:
+        confirmed = None
+    if confirmed is None:
+        records.append("PROFILE (no confirmed date)")
+    elif (today - confirmed).days > meta["review_after"]:
+        records.append(f"PROFILE (confirmed {confirmed}, {(today - confirmed).days} days ago; limit {meta['review_after']})")
+    plugin_json = plugin / ".claude-plugin" / "plugin.json"
+    if meta["plugin"] and plugin_json.is_file():
+        installed = json.loads(plugin_json.read_text()).get("version", "")
+        want = tuple(int(x) for x in re.findall(r"\d+", installed)[:2])
+        have = tuple(int(x) for x in re.findall(r"\d+", meta["plugin"])[:2])
+        if want and have < want:
+            records.append(f"PROFILE (written with plugin {meta['plugin']}, installed {installed})")
+    refs = plugin / "skills" / "review" / "references"
+    for role in meta["roles"]:
+        if role in ("tests", "ignore") or (refs / f"{role}.md").is_file() or meta["filled"].get(role):
+            continue
+        records.append(f"GAP layer {role} (no checklist in the plugin and no profile checks)")
 
     print("\n".join(records) if records else "none")
     print("Packs: " + (", ".join(loaded) if loaded else "none loaded"))

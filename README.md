@@ -6,7 +6,7 @@ The skills are generic: workflow, severity model, stack checklists. Everything s
 
 ![Three-tier architecture: plugin, project profile, init-profile](docs/architecture.png)
 
-1. **Plugin (this repo):** review workflow, severity model, layer checklists (`backend.md`, `frontend.md`, `infra.md`), stack packs, `stack-signals.md`.
+1. **Plugin (this repo):** review workflow, severity model, layer checklists (`backend.md`, `frontend.md`, `infra.md`, `docs.md`), stack packs, `stack-signals.md`.
 2. **Profile (each project repo):** `.claude/project-profile.md` with layout, commands, invariants, project-specific checks.
 3. **`init-profile`:** detects the stack, drafts the profile, asks before writing it.
 
@@ -16,9 +16,9 @@ Editable source: [`docs/architecture.excalidraw`](docs/architecture.excalidraw).
 
 | Plugin | Skills |
 |---|---|
-| `qa` | `/qa:review`, `/qa:init-profile` |
+| `qa` | `/qa:review`, `/qa:perf`, `/qa:finish`, `/qa:init-profile` |
 
-Layers: `backend`, `frontend`, `infra`. Stack packs: `python`, `django`, `sqlalchemy`, `fastapi`, `vue`, `inertia`, `astro`, `tailwind`, `docker`, `caddy`.
+Layers: `backend`, `frontend`, `infra`, `docs`. Stack packs: `python`, `django`, `sqlalchemy`, `fastapi`, `vue`, `inertia`, `astro`, `tailwind`, `docker`, `caddy`, `mkdocs`.
 
 ## Install
 
@@ -104,7 +104,7 @@ Drift is reported, never auto-fixed: invariants and severity are the owner's cal
 
 Known gaps:
 
-- Docs review, `/qa:perf`, whole-repo (`all`) scope, `finish-change`, and `nuxt`, `k8s`, `pyqt` packs are not written. The `infra` layer (`docker`, `caddy`) is checked on one real project with planted bugs, two runs per case.
+- `nuxt`, `k8s`, `pyqt` packs are not written. `/qa:review all` (whole layers, orchestrator plus per-unit reviewers) is tested on one backend with seven planted bugs and one orchestrator run (7 of 7, about 4× to 14× the cost of the alternatives); `/qa:perf` and `/qa:finish` are tested on one real project, a few runs each (results in their specs under `docs/specs/`). The `docs` layer (`mkdocs` pack) is checked on one real project with planted bugs, two runs per case (results in `docs/specs/2026-10-07-docs-layer-design.md`). The `infra` layer (`docker`, `caddy`) is checked on one real project with planted bugs, two runs per case.
 - The checked numbers above are from `v0.1.0` (`review-backend`). `/qa:review` wave-1 results (two real projects, side by side with their old skills, overrides 2/2) are in [`docs/specs/2026-10-05-unified-review-design.md`](docs/specs/2026-10-05-unified-review-design.md#results-2026-10-05).
 - Drift records and the `Packs:` line come from `plugins/qa/scripts/drift.py` (unit-tested); the line says which packs a review should load, not that the model read them. Versions in `yarn.lock` and `Pipfile.lock` are not read.
 - The banned-word scan in `scripts/check-plugin.py` only runs where a local `.banned-words` exists, so not in CI.

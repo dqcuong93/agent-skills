@@ -20,6 +20,7 @@ SIGNALS = """# Stack signals
 | `vue` | frontend | `vue` |
 | `docker` | infra | a `Dockerfile*` anywhere in the repo |
 | `caddy` | infra | a `Caddyfile*` anywhere in the repo |
+| `mkdocs` | docs | a `mkdocs.yml` anywhere in the repo |
 """
 
 
@@ -39,17 +40,22 @@ class DriftTest(unittest.TestCase):
         write(refs / "backend-python.md", "# P\n\nWritten for: Python 3\n")
         write(refs / "backend-django.md", "# D\n\nWritten for: Django 6\n")
         write(refs / "frontend-vue.md", "# V\n\nWritten for: Vue 3\n")
+        write(refs / "docs-mkdocs.md", "# M\n\nWritten for: MkDocs 1\n")
+        for layer in ("backend", "frontend", "docs"):
+            write(refs / f"{layer}.md", f"# {layer}\n")
 
     def tearDown(self) -> None:
         self.tmp.cleanup()
 
-    def profile(self, stacks: str, layout: str = "- backend: .\n- frontend: fe/\n") -> None:
+    def profile(self, stacks: str, layout: str = "- backend: .\n- frontend: fe/\n",
+                front: str = "confirmed: 2026-10-01\n", extra: str = "") -> None:
         write(self.proj / ".claude" / "project-profile.md",
-              f"---\nstacks: [{stacks}]\n---\n\n# Project profile\n\n## Layout\n\n{layout}\n## Commands\n")
+              f"---\nstacks: [{stacks}]\n{front}---\n\n# Project profile\n\n## Layout\n\n{layout}\n"
+              f"## Commands\n\n## Backend checks\n\n## Frontend checks\n\n{extra}")
 
     def run_drift(self, *extra: str) -> list[str]:
         out = subprocess.run(
-            [sys.executable, str(SCRIPT), "--plugin-root", str(self.plugin), *extra, str(self.proj)],
+            [sys.executable, str(SCRIPT), "--plugin-root", str(self.plugin), "--today", "2026-10-06", *extra, str(self.proj)],
             capture_output=True, text=True, check=True,
         ).stdout
         return out.strip().splitlines()
@@ -105,6 +111,42 @@ class DriftTest(unittest.TestCase):
         write(self.proj / "be" / "pyproject.toml", '[project]\ndependencies = ["django>=6"]\n')
         out = self.run_drift()
         self.assertIn("STACK django (pack available)", out)
+
+    def test_mkdocs_file_signal_and_loaded_pack(self) -> None:
+        self.profile("python", "- backend: .\n- docs: docs/\n")
+        write(self.proj / "pyproject.toml", "[project]\n")
+        write(self.proj / "mkdocs-config" / "mkdocs.yml", "site_name: x\n")
+        self.assertIn("STACK mkdocs (pack available)", self.run_drift())
+        self.profile("python, mkdocs", "- backend: .\n- docs: docs/\n")
+        self.assertEqual(self.run_drift("--layers", "docs"), ["none", "Packs: mkdocs 1/?"])
+
+    def test_profile_not_confirmed_or_too_old(self) -> None:
+        write(self.proj / "pyproject.toml", "[project]\n")
+        self.profile("python", "- backend: .\n", front="")
+        self.assertIn("PROFILE (no confirmed date)", self.run_drift())
+        self.profile("python", "- backend: .\n", front="confirmed: 2026-01-01\nreview-after-days: 30\n")
+        self.assertIn("PROFILE (confirmed 2026-01-01, 278 days ago; limit 30)", self.run_drift())
+        self.profile("python", "- backend: .\n", front="confirmed: 2026-09-20\n")
+        self.assertNotIn("PROFILE", " ".join(self.run_drift()))
+
+    def test_profile_written_with_older_plugin(self) -> None:
+        write(self.proj / "pyproject.toml", "[project]\n")
+        write(self.plugin / ".claude-plugin" / "plugin.json", '{"version": "0.4.1"}')
+        self.profile("python", "- backend: .\n", front="confirmed: 2026-10-01\nplugin: 0.3.0\n")
+        self.assertIn("PROFILE (written with plugin 0.3.0, installed 0.4.1)", self.run_drift())
+        self.profile("python", "- backend: .\n", front="confirmed: 2026-10-01\nplugin: 0.4.0\n")
+        self.assertNotIn("PROFILE", " ".join(self.run_drift()))
+
+    def test_gap_for_layer_without_checklist_or_profile_checks(self) -> None:
+        write(self.proj / "pyproject.toml", "[project]\n")
+        write(self.plugin / "skills" / "review" / "references" / "backend.md", "# B\n")
+        self.profile("python", "- backend: .\n- ops: ops/\n- tests: t/\n- ignore: x/\n")
+        out = self.run_drift()
+        self.assertIn("GAP layer ops (no checklist in the plugin and no profile checks)", out)
+        self.assertNotIn("GAP layer backend (no checklist in the plugin and no profile checks)", out)
+        self.assertFalse(any(l.startswith("GAP layer tests") or l.startswith("GAP layer ignore") for l in out))
+        self.profile("python", "- backend: .\n- ops: ops/\n", extra="## Ops checks\n\n- Rotate keys.\n")
+        self.assertNotIn("GAP layer ops (no checklist in the plugin and no profile checks)", self.run_drift())
 
 
 if __name__ == "__main__":

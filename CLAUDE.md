@@ -48,15 +48,16 @@ The deterministic script (`plugins/qa/scripts/drift.py`) has unit tests: `python
 
 ## Open work (priority order)
 
-1. Tag `v0.2.0` and update installs (wave 1 acceptance is recorded in `docs/specs/2026-10-05-unified-review-design.md` § Results).
+1. Tag `v0.3.0` (it includes the unreleased `0.2.0` content) and update installs on each machine with `claude plugin update qa@dqcuong93`; wave 1 acceptance is in `docs/specs/2026-10-05-unified-review-design.md` § Results.
 2. Remove the old in-repo QA skills from those projects once Cursor's handling of plugin skills is confirmed; repoint their `finish-change`, agent instructions, and AI docs to `/qa:review`.
 3. Wave 2 cycles, in order (specs and plans in `docs/specs/` and `docs/plans/`, dated 2026-10-06):
    - 0 layout confirmation in `init-profile`: implemented, accepted, not committed until the owner commits it.
    - 1 `infra` layer (`docker`, `caddy` packs; `k8s` later): implemented and accepted (results in `docs/specs/2026-10-06-infra-layer-design.md`); not committed until the owner commits it.
-   - 2 `docs` layer; 3 `/qa:perf` as its own skill: no spec yet.
-   - 4 `all` scope (whole layer or repo): orchestrator plus per-unit reviewers in fresh contexts, units from a profile `Critical areas` section the owner confirms; recall measured with planted bugs.
-   - 5 profile lifecycle: `confirmed:` and `plugin:` lines, `PROFILE` and `GAP` records, re-research when a `STACK … (no pack)` record appears.
-   - 6 `finish-change` as a plugin skill that calls `/qa:review --no-ask`; `ui-ux-pro-max` stays an external plugin.
+   - 2 `docs` layer (`mkdocs` pack): implemented and accepted (results in `docs/specs/2026-10-07-docs-layer-design.md`); not committed until the owner commits it.
+   - 3 `/qa:perf` as its own skill: implemented and accepted (results in `docs/specs/2026-10-06-perf-skill-design.md`); not committed until the owner commits it.
+   - 4 `all` scope (whole layer or repo): implemented and accepted with caveats (`docs/specs/2026-10-06-all-scope-design.md`); not committed until the owner commits it.
+   - 5 profile lifecycle (`confirmed:`, `plugin:`, `PROFILE` and `GAP` records): implemented (`docs/specs/2026-10-06-profile-lifecycle-design.md`).
+   - 6 `/qa:finish` plugin skill: implemented (`docs/specs/2026-10-06-finish-skill-design.md`); `ui-ux-pro-max` stays an external plugin, named only in a profile.
 4. Packs the owner's repos need: `nuxt`, `pyqt`, infra `k8s`.
 5. Profiles for the other projects, porting their project-specific rules out of their in-repo skills.
 6. Community release: React/Next and Node packs, validate `init-profile` research on unfamiliar repos, example output in the README.

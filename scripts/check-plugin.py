@@ -60,11 +60,32 @@ def main() -> int:
             if any(op in cmd for op in SHELL_OPS):
                 fails.append(f"injection: {skill_md.relative_to(ROOT)} runs `{cmd}`")
 
+    perf = PLUGIN / "skills" / "perf"
+    perf_text = (perf / "SKILL.md").read_text() if (perf / "SKILL.md").is_file() else ""
+    for ref in sorted((perf / "references").glob("*.md")):
+        checks += 1
+        if f"references/{ref.name}" not in perf_text:
+            fails.append(f"linked: perf references/{ref.name} not linked from perf/SKILL.md")
+        if "-" in ref.stem:
+            lines = ref.read_text().splitlines()
+            checks += 1
+            if len(lines) < 3 or not WRITTEN_FOR.match(lines[2]):
+                fails.append(f"written-for: perf {ref.name} line 3 is not 'Written for: <stack> <major>'")
+            checks += 1
+            if f"| `{ref.stem.split('-', 1)[1]}` |" not in signal_text:
+                fails.append(f"signals: perf stack key of {ref.name} has no row in stack-signals.md")
+
     template = PLUGIN / "skills" / "init-profile" / "profile-template.md"
     checks += 1
     layout = re.search(r"^## Layout\n(.*?)^## ", template.read_text(), re.S | re.M)
     if not layout or "- ignore:" not in layout.group(1):
         fails.append("template: profile-template.md has no '- ignore:' line under Layout")
+    checks += 1
+    if "<doc path § section" not in template.read_text() or "do not copy their text" not in template.read_text():
+        fails.append("template: profile-template.md lost the point-don't-copy guidance for docs and invariants")
+    checks += 1
+    if not all(re.search(rf"^{k}:", template.read_text(), re.M) for k in ("confirmed", "plugin", "review-after-days")):
+        fails.append("template: profile-template.md front matter lacks confirmed, plugin, or review-after-days")
 
     drift = PLUGIN / "scripts" / "drift.py"
     checks += 1
