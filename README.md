@@ -35,7 +35,7 @@ For everyone working in a repo, commit this to the repo's `.claude/settings.json
 {
   "extraKnownMarketplaces": {
     "dqcuong93": {
-      "source": { "source": "github", "repo": "dqcuong93/agent-skills", "ref": "v0.2.0" }
+      "source": { "source": "github", "repo": "dqcuong93/agent-skills", "ref": "v0.3.0" }
     }
   },
   "enabledPlugins": { "qa@dqcuong93": true }
@@ -95,7 +95,7 @@ Drift is reported, never auto-fixed: invariants and severity are the owner's cal
 
 ## Status
 
-`v0.2.0`, not yet tagged. `v0.1.0` was published untagged on `main`. Checked so far (Claude `sonnet`, a few runs per case, so treat as indicative):
+`v0.3.0`, not yet tagged (`v0.2.0` was never tagged; its content is included). `v0.1.0` was published untagged on `main`. Checked so far (Claude `sonnet`, a few runs per case, so treat as indicative):
 
 - Catches planted bugs: 6/6 blatant and 4/4 subtle (invariant, tenant-scope, audit, readiness-gate) on a real project, matching the in-repo skill it is meant to replace.
 - With permission to run commands it runs the project's `pytest`/`ruff`/`mypy`/`lint-imports` and cites failing tests.
@@ -104,11 +104,11 @@ Drift is reported, never auto-fixed: invariants and severity are the owner's cal
 
 Known gaps:
 
-- Infra and docs review, `finish-change`, and `nuxt`, `k8s`, `pyqt` packs are not written.
+- Docs review, `/qa:perf`, whole-repo (`all`) scope, `finish-change`, and `nuxt`, `k8s`, `pyqt` packs are not written. The `infra` layer (`docker`, `caddy`) is checked on one real project with planted bugs, two runs per case.
 - The checked numbers above are from `v0.1.0` (`review-backend`). `/qa:review` wave-1 results (two real projects, side by side with their old skills, overrides 2/2) are in [`docs/specs/2026-10-05-unified-review-design.md`](docs/specs/2026-10-05-unified-review-design.md#results-2026-10-05).
-- Stale-pack detection is verified on one run only; the `Packs:` line can miss versions in nested `package.json` files.
+- Drift records and the `Packs:` line come from `plugins/qa/scripts/drift.py` (unit-tested); the line says which packs a review should load, not that the model read them. Versions in `yarn.lock` and `Pipfile.lock` are not read.
 - The banned-word scan in `scripts/check-plugin.py` only runs where a local `.banned-words` exists, so not in CI.
-- Updating an existing profile via `/qa:init-profile` is untested.
+- `/qa:init-profile` asks the user to confirm the layout (first run and updates); tested headless up to the profile write, which headless runs cannot do (`.claude/` is a protected path), so the write step is untested.
 - Cursor does not read Claude plugins; `npx skills add dqcuong93/agent-skills -a cursor` is an unverified option.
 
 ## Rules for this repo

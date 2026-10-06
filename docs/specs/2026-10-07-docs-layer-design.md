@@ -1,0 +1,84 @@
+# `docs` layer for `/qa:review` — design (wave 2, cycle 2)
+
+Status: draft, awaiting review. Date: 2026-10-07.
+
+## Goal
+
+Add a `docs` layer to `/qa:review` so it covers what Project A's in-repo `qa-qc-docs-ai` skill covers: system documentation (feature specs, indexes, architecture notes) and multi-AI configuration (canonical context file, tool adapters, skills list), driven by the project profile. When it passes the acceptance tests below, that in-repo skill can be removed. The model and the infra cycle are in `2026-10-05-unified-review-design.md` and `2026-10-06-infra-layer-design.md`.
+
+Out of scope: whole-repo audits (orphan links across every file, every `@see` path in the codebase). They belong to the `all` scope (cycle 4). In diff mode the layer reviews the changed docs and the docs a change should have updated.
+
+## Decisions
+
+### D1. Files and routing
+
+No new skill. New reference files under `skills/review/references/`:
+
+| File | Holds |
+|---|---|
+| `docs.md` | Rules true for any project's documentation and AI configuration |
+| `docs-mkdocs.md` | MkDocs rules (`Written for: MkDocs 1`) |
+
+`SKILL.md` changes: routing table rows for both files (the pack loads when `docs` is in scope and `mkdocs` is in `stacks`); the argument becomes `[backend|frontend|infra|docs]`; the profile section `Docs checks` is walked in step 6 like the other layers' checks. `stack-signals.md` gains `| mkdocs | docs | a mkdocs.yml anywhere in the repo |`; `drift.py` gets a file-signal entry for it.
+
+The profile template gains a `- docs:` line under `Layout` and a `## Docs checks` section. Routing is by `Layout` only (no routing by file name): a project lists `docs/`, `AGENTS.md`, `.cursor/` and so on under `docs`, and the longest literal prefix wins. A change to a doc that sits inside another layer's path (a backend `README`) goes to that layer; the docs-drift step (step 9) still compares it with the code.
+
+### D2. Where each old rule goes
+
+| Old rule | Goes to |
+|---|---|
+| Feature spec states the contract (rules, integration points, live vs backlog) | `docs.md` |
+| Routes, endpoints, env vars, and ports in docs match the shipped code | `docs.md` (the check names the failure: a reader follows a dead route) |
+| Links resolve; no link to a deleted or ephemeral file | `docs.md` |
+| New doc has an index row and a nav entry | `docs.md` (index) and `docs-mkdocs.md` (nav, `mkdocs build --strict`) |
+| Names, routes, or fields the diff removed or renamed are searched for in docs and comments | `docs.md` |
+| Docstrings and comments that encode a contract match the code | already in the backend and frontend checklists; `docs.md` points at neither, it does not repeat them |
+| One canonical AI context file; adapters only point to it or import it | `docs.md` |
+| Adapter files stay short; no domain content copied into them or into always-on rules | `docs.md` |
+| Skills list in the context file matches the skills on disk | `docs.md` |
+| Teaching diagrams still argue the same fact as the doc they illustrate | `docs.md` generic part: "a diagram or figure the change falsifies is updated"; which diagrams exist stays in the profile |
+| The `git grep` lines (orphan `superpowers/specs` links, deprecated mirror files, `@see` existence, `AGENTS.md § Gotchas` pointers) | profile `Docs checks` (they name project paths) |
+| Update order (docs first, context file only for new routes/gotchas), ephemeral specs deleted after the branch | profile |
+| Pre-commit hooks (markdownlint, links, mkdocs) | profile `extra` commands |
+
+Anything the profile already holds is not copied into the plugin.
+
+### D3. Severity
+
+The shared table already grades docs drift WARNING. A project that treats a wrong documented contract as CRITICAL says so under its profile `Severity overrides`, as for any other rule; the layer adds no default override. The old skill's CRITICAL cases (wrong contract, orphan link in shipped docs, duplicate AI context causing drift) move to Project A's profile.
+
+### D4. Commands
+
+Doc checks that need a tool come from the profile's `extra` commands (link checker, markdown lint, `mkdocs build --strict`). If a tool is missing or not allowed, the report says `not run (<why>)` and the finding is judged from the text.
+
+### D5. `check-plugin.py`, `drift.py`
+
+`check-plugin.py` needs no change beyond the new files being linked from `SKILL.md`. `drift.py` gets one entry in `FILE_SIGNALS` (`mkdocs`: `mkdocs.yml`) and a unit test for it; `CLAUDE.md` already says to change the script and its tests together with `stack-signals.md`.
+
+## Tests
+
+Clone Project A, extend its profile (`docs:` layout line, `mkdocs` in `stacks`, `Docs checks` carried over from the old skill's grep lines, doc checks under `extra`), and plant uncommitted edits. Ground truth first: record what the project's link checker and `mkdocs build --strict` say on the clean clone and on the planted tree.
+
+1. A feature doc states a route the code does not serve (change the doc, not the code).
+2. A new doc file with no index row and no nav entry.
+3. A doc linking to a file that the change deletes.
+4. A paragraph of domain content copied into an adapter file that should only import the canonical context.
+5. A renamed route in code with the old route left in a doc the diff does not touch.
+6. A change touching docs and backend together (routing across layers).
+7. A doc inside a backend path (checks that routing follows the profile; run once as is, once with it listed under `docs`).
+
+Run `/qa:review` and the old `qa-qc-docs-ai` twice each, same model, tools, and prompt.
+
+## Acceptance
+
+- Planted bugs 1, 2, 3 and 5 are reported in both runs; bug 4 in at least one; none graded above WARNING unless the profile says so.
+- Every finding is checked against the files by hand; none contradicts them.
+- Run 6 reports backend and docs findings in one report, each under its layer's rules; run 7 follows the profile in both cases.
+- On the same diff, `/qa:review` finds everything the old skill found; extra findings are judged by hand.
+- `Packs:` lists `mkdocs` when it is in `stacks`; the output is valid; `check-plugin.py`, the script tests, and `claude plugin validate --strict` pass.
+
+## Risks
+
+- **Over-reach into whole-repo audits.** Grep lines that scan every file are tempting to put in `docs.md`; they stay in the profile and in the `all` scope.
+- **Generic rules that are really one project's habits** (for example "context file only for new routes"). Each `docs.md` item names the failure it prevents; project habits stay in the profile.
+- **Overlap with step 9** (docs drift against the profile's `Docs to keep in sync`). The layer reviews docs that changed; step 9 reviews docs the change should have updated. A finding reported by both is merged under the finding rules.

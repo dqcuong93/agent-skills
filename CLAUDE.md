@@ -8,7 +8,7 @@ State: `main` is published on GitHub; no tags yet.
 
 ```
 .claude-plugin/marketplace.json            marketplace "dqcuong93"
-plugins/qa/.claude-plugin/plugin.json      plugin "qa", version 0.2.0
+plugins/qa/.claude-plugin/plugin.json      plugin "qa", version 0.3.0
 plugins/qa/stack-signals.md                manifests + dependency → stack key (shared by both skills)
 plugins/qa/skills/review/                  SKILL.md + references/{backend,frontend}.md + <layer>-<stack>.md packs
 plugins/qa/skills/init-profile/            SKILL.md + profile-template.md
