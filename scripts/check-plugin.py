@@ -60,6 +60,17 @@ def main() -> int:
             if any(op in cmd for op in SHELL_OPS):
                 fails.append(f"injection: {skill_md.relative_to(ROOT)} runs `{cmd}`")
 
+    template = PLUGIN / "skills" / "init-profile" / "profile-template.md"
+    checks += 1
+    layout = re.search(r"^## Layout\n(.*?)^## ", template.read_text(), re.S | re.M)
+    if not layout or "- ignore:" not in layout.group(1):
+        fails.append("template: profile-template.md has no '- ignore:' line under Layout")
+
+    drift = PLUGIN / "scripts" / "drift.py"
+    checks += 1
+    if not drift.is_file() or "scripts/drift.py" not in skill_text:
+        fails.append("drift: plugins/qa/scripts/drift.py is missing or not called from review/SKILL.md")
+
     if BANNED.is_file():
         words = [w.strip().lower() for w in BANNED.read_text().splitlines() if w.strip()]
         tracked = subprocess.run(

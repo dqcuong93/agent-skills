@@ -1,8 +1,8 @@
 ---
 name: review
-description: Use when reviewing backend or frontend code (services, APIs, ORM/DB, jobs, components, pages, styling) for correctness, security, performance, test gaps, or project invariants — on uncommitted changes, a branch, a commit range, staged files, or a path, or before merging.
-argument-hint: "[backend|frontend] [--no-ask] [path | branch | commit | range | staged]"
-allowed-tools: Bash(git status *) Bash(git diff *) Bash(git log *) Bash(git show *) Bash(git branch *) Bash(git symbolic-ref *) Read Glob Grep
+description: Use when reviewing backend, frontend, or infrastructure code (services, APIs, ORM/DB, jobs, components, pages, styling, Dockerfiles, compose files, proxy config, deploy scripts) for correctness, security, performance, test gaps, or project invariants — on uncommitted changes, a branch, a commit range, staged files, or a path, or before merging.
+argument-hint: "[backend|frontend|infra] [--no-ask] [path | branch | commit | range | staged]"
+allowed-tools: Bash(git status *) Bash(git diff *) Bash(git log *) Bash(git show *) Bash(git branch *) Bash(git symbolic-ref *) Bash(python3 ${CLAUDE_PLUGIN_ROOT}/scripts/drift.py *) Read Glob Grep
 ---
 
 # QA review
@@ -15,7 +15,7 @@ Generic review workflow. Project facts come from `.claude/project-profile.md`. L
 
 Arguments: `$ARGUMENTS`
 
-- `backend` or `frontend`: review only that layer.
+- `backend`, `frontend`, or `infra`: review only that layer.
 - `--no-ask`: never stop to ask. Used by headless runs and other skills.
 - `staged`, a branch, a commit, a range (`A..B`), or a path: what to review. For a commit or range, judge the code as it was at that commit (`git show <commit>:<path>`), not the working tree. Empty: uncommitted changes. If there are none and the current branch is not the default branch, review the branch against its base (`git diff <default>...HEAD`; find `<default>` with `git symbolic-ref --short refs/remotes/origin/HEAD`, else `main`, else `master`) and say which base you used. On the default branch with a clean tree, ask what to review; with `--no-ask`, report `Nothing to review` and stop.
 
@@ -35,6 +35,9 @@ Load only what step 4 selects. A pack's stack key is the part of its name after 
 | [references/frontend-inertia.md](references/frontend-inertia.md) | frontend in scope and `inertia` in stacks |
 | [references/frontend-astro.md](references/frontend-astro.md) | frontend in scope and `astro` in stacks |
 | [references/frontend-tailwind.md](references/frontend-tailwind.md) | frontend in scope and `tailwind` in stacks |
+| [references/infra.md](references/infra.md) | an infra file is in scope |
+| [references/infra-docker.md](references/infra-docker.md) | infra in scope and `docker` in stacks |
+| [references/infra-caddy.md](references/infra-caddy.md) | infra in scope and `caddy` in stacks |
 
 Stack signals and the manifest list: `${CLAUDE_PLUGIN_ROOT}/stack-signals.md`.
 
@@ -43,7 +46,7 @@ Stack signals and the manifest list: `${CLAUDE_PLUGIN_ROOT}/stack-signals.md`.
 1. **Profile.** Read `.claude/project-profile.md`. If it does not exist, the profile is `NO_PROFILE`.
 
 2. **Layout.**
-   - **With a profile:** assign each changed file to the layer whose `Layout` path contains it (a path with `*` matches as a glob). When several match, the longest path wins (`frontend/` beats `.`). `tests` paths are not a layer of their own: a test file goes to the layer it tests (backend or frontend) by the same rule with `tests` left out. Layers with no checklist yet (e.g. `infra`) go under **Not checked**.
+   - **With a profile:** assign each changed file to the layer whose `Layout` path contains it (a path with `*` matches as a glob). When several match, the entry with the longest literal prefix (the text before the first `*`) wins (`frontend/` beats `.`, `be/Dockerfile*` beats `be/`). A file under an `ignore` entry is not reviewed; list it under **Not checked** as `ignored by profile`. `tests` paths are not a layer of their own: a test file goes to the layer it tests (backend or frontend) by the same rule with `tests` left out. A layer with no reference file in the plugin but with `<Layer> checks` in the profile is reviewed with those profile checks alone (say `profile checks only` for that layer under **Not checked**). A layer with neither goes under **Not checked**.
    - **`NO_PROFILE`, no `--no-ask`:** do not guess layers from file extensions. Read the manifests listed in `stack-signals.md` at the root and one directory down, map their dependencies to stack keys, then ask the user in the conversation's language, filled in with what you found:
 
      > This repo has no `.claude/project-profile.md`, so I need to know how it is laid out.
@@ -57,15 +60,16 @@ Stack signals and the manifest list: `${CLAUDE_PLUGIN_ROOT}/stack-signals.md`.
      > 3. Create a profile first with `/qa:init-profile` so I don't ask again.
 
      **End the turn with this question. Do not start the review in the same turn.** On the reply, use the confirmed layout and stacks for this run only; write nothing.
-   - **`NO_PROFILE` with `--no-ask`:** a directory holding a Python manifest is backend; a directory whose `package.json` matches a frontend stack key is frontend. Load only `backend.md` and `frontend.md`. Every file's layer is listed as `assumed` under **Not checked**.
+   - **`NO_PROFILE` with `--no-ask`:** a directory holding a Python manifest is backend; a directory whose `package.json` matches a frontend stack key is frontend. Load only `backend.md` and `frontend.md`. Every file's layer is listed as `assumed` under **Not checked**. Infra manifests found this way are listed as `assumed` under **Not checked**; infra is not reviewed without a profile or a confirmed layout.
    - Files in no layer go under **Not checked**. Never review them with another layer's checklist.
-   - A `backend` or `frontend` argument drops the other layer.
+   - A layer argument drops the other layers.
 
-3. **Drift (required with a profile; do not skip it to save turns).** Skip only with `NO_PROFILE`. Open `stack-signals.md`, then open a manifest in the root and in every `Layout` path of the profile (Glob for it; never guess a path such as `be/pyproject.toml`), and map them through it. Write `none` only after both were opened in this run. Record, never fix:
+3. **Drift (required with a profile; do not skip it to save turns).** Skip only with `NO_PROFILE`. Run `python3 ${CLAUDE_PLUGIN_ROOT}/scripts/drift.py --layers <layers in scope, comma-separated> .` from the project root. The script reads the profile, the manifests and lockfiles in the root and every `Layout` path, `stack-signals.md`, and the reference files, and prints the `STACK` and `PACK` records (or `none`) and the `Packs:` line. Copy that output into **Profile drift** unchanged, adding only the action for each record; never write or edit a `Packs:` line yourself. If the script cannot run (no `python3`, error), say so under **Commands run** and fall back to reading `stack-signals.md` and a manifest in the root and in every `Layout` path by hand. Then add the `LAYOUT` records, which the script does not compute. The records, for reference; record, never fix:
    - `STACK <key> (pack available)`: signal matched, key missing from `stacks`, a `references/*-<key>.md` exists.
    - `STACK <key> (no pack)`: signal matched, key missing from `stacks`, no pack file.
    - `STACK <key> (unknown key)`: key in `stacks` matches no signal and has no pack file.
    - `STACK ? (no manifest found in <paths>)`: no manifest anywhere searched.
+   - `LAYOUT <directory> (unmapped): <n> changed files`: with a profile only. Changed files that match no `Layout` entry and no `ignore` entry. One record per top-level directory of those files (a root-level file uses `.`). The profile file `.claude/project-profile.md` itself never produces a record. Build it from the changed files only; never scan the repo for it.
    - A key already listed in `stacks` is never reported as `pack available` or `no pack`.
    - `PACK <key> (written for <n>, project uses <m>): may be stale`: emit exactly this line when the project's major version of a loaded pack's dependency is greater than the pack's `Written for` major. To find the project's version, read every manifest you read above, including `requirements*.txt` inside `Layout` paths (pinned `==`, or the lower bound of `>=`, `^`, `~`); if none names it directly, Grep the root lockfile (`uv.lock`, `poetry.lock`, `pnpm-lock.yaml`, `package-lock.json`) for its resolved version.
    - Always end the drift record with one line listing every pack loaded in step 4 (a pack not opened is not listed): `Packs: <key> <written-for major>/<project major or ?>`; `?` only after the manifests and the lockfile were opened and name no version, e.g. `Packs: django 6/6, vue 3/3, astro 6/?`.
@@ -74,7 +78,7 @@ Stack signals and the manifest list: `${CLAUDE_PLUGIN_ROOT}/stack-signals.md`.
 
 5. **Invariants first.** For every profile invariant the change touches, read the code that enforces it and verify it holds. A break is CRITICAL.
 
-6. **Checklists.** Walk the layer file, then its packs, then the profile's `<Layer> checks`. Report only items the change affects.
+6. **Checklists.** Walk the layer file, then its packs, then the profile's `<Layer> checks` (for a layer with no reference file, the profile checks only). Report only items the change affects.
 
 7. **Run, don't guess.** Run the profile's `lint`, `typecheck`, and `test` commands, scoped to the change when the tool allows. Report each exact command and its result. If one cannot run (missing database, service, tool), say which and why. Silent output is not a pass; check the exit code. The shell may be zsh: do not use `echo =====` or `PIPESTATUS`, and do not chain `; echo $?` (headless permission checks reject it). Run each command on its own: the Bash tool reports a non-zero exit itself, so no error line means exit 0.
 
@@ -108,6 +112,6 @@ Return exactly these parts, in order:
 
 1. **Verdict**: one line, `PASS`, `PASS WITH WARNINGS`, or `FAIL` (any CRITICAL).
 2. **Findings**: CRITICAL, then WARNING, then SUGGESTION. One per line: `SEVERITY path:line — problem. Why it matters. Fix.` Cite the `INV-xxx`, checklist item, or URL that applies.
-3. **Profile drift**: one line per record from step 3, with what to do (`pack available` → add the key to `stacks` or run `/qa:init-profile`; `no pack` → add the key to `stacks` and its rules to the profile's checks; `unknown key` → fix or remove it; `may be stale` → tell the plugin owner), then the `Packs:` line. Write `none` before it when there are no records. With a profile this part is mandatory: an output without a `Packs:` line is invalid, so go back and finish steps 3 and 4 first.
+3. **Profile drift**: one line per record from step 3, with what to do (`pack available` → add the key to `stacks` or run `/qa:init-profile`; `no pack` → add the key to `stacks` and its rules to the profile's checks; `unknown key` → fix or remove it; `may be stale` → tell the plugin owner; `LAYOUT … (unmapped)` → run `/qa:init-profile` to give the directory a role or ignore it), then the `Packs:` line. Write `none` before it when there are no records. With a profile this part is mandatory: an output without a `Packs:` line is invalid, so go back and finish steps 3 and 4 first.
 4. **Commands run**: each command with `ran ✓`, `ran ✗`, or `not run (<why>)`.
-5. **Not checked**: files outside every layer, `assumed` layers, and anything in scope you could not verify, with why.
+5. **Not checked**: files outside every layer, files under `ignore` (`ignored by profile`), `assumed` layers, and anything in scope you could not verify, with why.

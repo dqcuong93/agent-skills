@@ -11,12 +11,16 @@ stacks: []
 
 ## Layout
 
-<!-- Where each layer lives, as paths from the repo root. Reviews assign a changed file to the
-     layer whose path contains it; the longest path wins (`frontend/` beats `.`). -->
+<!-- Where each layer lives, as paths or globs from the repo root, comma-separated, each
+     optionally followed by a note in parentheses. Reviews assign a changed file to the layer
+     whose entry matches it; with several matches the entry with the longest literal prefix
+     (the text before the first `*`) wins (`frontend/` beats `.`, `be/Dockerfile*` beats `be/`).
+     `ignore` lists paths the owner said belong to no layer; they are never reviewed. -->
 - backend:
 - frontend:
 - infra:
 - tests:
+- ignore:
 
 ## Commands
 

@@ -9,5 +9,5 @@
   },
   "repository": "https://github.com/dqcuong93/agent-skills",
   "license": "MIT",
-  "keywords": ["qa", "code-review", "checklist", "django", "fastapi", "sqlalchemy", "python", "vue", "inertia", "astro", "tailwind", "frontend"]
+  "keywords": ["qa", "code-review", "checklist", "django", "fastapi", "sqlalchemy", "python", "vue", "inertia", "astro", "tailwind", "frontend", "infra", "docker", "caddy"]
 }

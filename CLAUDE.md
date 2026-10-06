@@ -32,9 +32,11 @@ docs/specs/, docs/plans/                   design specs and implementation plans
 - **zsh:** `--include=*.py` in grep and `echo =====` break (glob / `=cmd` expansion). Use `-F`, `printf`.
 - **Descriptions** start with "Use when…" and describe triggers only, never the workflow.
 
+- **`drift.py` parses `stack-signals.md` and each pack's line 3.** The `STACK`/`PACK` records and the `Packs:` line of `/qa:review` come from `plugins/qa/scripts/drift.py`, not from the model. Change the signals table format or the `Written for:` line only together with the script and `scripts/test_drift.py`. File-based keys (`docker`, `caddy`) are hard-coded in the script.
+
 ## Testing
 
-No unit tests; skills are tested by running them headless against fake or cloned projects and reading the output (regex scoring over-counts; read results by hand).
+The deterministic script (`plugins/qa/scripts/drift.py`) has unit tests: `python3 -m unittest discover -s scripts -p 'test_*.py'`. Skills themselves have no unit tests; they are tested by running them headless against fake or cloned projects and reading the output (regex scoring over-counts; read results by hand).
 
 - Fake project: `git init`, a profile, a small uncommitted change, then
   `claude -p "/qa:review" --model sonnet --plugin-dir ./plugins/qa --allowedTools "Read,Glob,Grep,Bash(git *)" --output-format json < /dev/null`.
@@ -48,7 +50,13 @@ No unit tests; skills are tested by running them headless against fake or cloned
 
 1. Tag `v0.2.0` and update installs (wave 1 acceptance is recorded in `docs/specs/2026-10-05-unified-review-design.md` § Results).
 2. Remove the old in-repo QA skills from those projects once Cursor's handling of plugin skills is confirmed; repoint their `finish-change`, agent instructions, and AI docs to `/qa:review`.
-3. More layers and skills: infra (`docker`, `caddy`, `k8s`), docs, `performance-optimization`, `finish-change`.
-4. Packs the owner's repos need: `nuxt`, `pyqt`.
+3. Wave 2 cycles, in order (specs and plans in `docs/specs/` and `docs/plans/`, dated 2026-10-06):
+   - 0 layout confirmation in `init-profile`: implemented, accepted, not committed until the owner commits it.
+   - 1 `infra` layer (`docker`, `caddy` packs; `k8s` later): implemented and accepted (results in `docs/specs/2026-10-06-infra-layer-design.md`); not committed until the owner commits it.
+   - 2 `docs` layer; 3 `/qa:perf` as its own skill: no spec yet.
+   - 4 `all` scope (whole layer or repo): orchestrator plus per-unit reviewers in fresh contexts, units from a profile `Critical areas` section the owner confirms; recall measured with planted bugs.
+   - 5 profile lifecycle: `confirmed:` and `plugin:` lines, `PROFILE` and `GAP` records, re-research when a `STACK … (no pack)` record appears.
+   - 6 `finish-change` as a plugin skill that calls `/qa:review --no-ask`; `ui-ux-pro-max` stays an external plugin.
+4. Packs the owner's repos need: `nuxt`, `pyqt`, infra `k8s`.
 5. Profiles for the other projects, porting their project-specific rules out of their in-repo skills.
 6. Community release: React/Next and Node packs, validate `init-profile` research on unfamiliar repos, example output in the README.

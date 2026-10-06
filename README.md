@@ -6,7 +6,7 @@ The skills are generic: workflow, severity model, stack checklists. Everything s
 
 ![Three-tier architecture: plugin, project profile, init-profile](docs/architecture.png)
 
-1. **Plugin (this repo):** review workflow, severity model, layer checklists (`backend.md`, `frontend.md`), stack packs, `stack-signals.md`.
+1. **Plugin (this repo):** review workflow, severity model, layer checklists (`backend.md`, `frontend.md`, `infra.md`), stack packs, `stack-signals.md`.
 2. **Profile (each project repo):** `.claude/project-profile.md` with layout, commands, invariants, project-specific checks.
 3. **`init-profile`:** detects the stack, drafts the profile, asks before writing it.
 
@@ -18,7 +18,7 @@ Editable source: [`docs/architecture.excalidraw`](docs/architecture.excalidraw).
 |---|---|
 | `qa` | `/qa:review`, `/qa:init-profile` |
 
-Layers: `backend`, `frontend`. Stack packs: `python`, `django`, `sqlalchemy`, `fastapi`, `vue`, `inertia`, `astro`, `tailwind`.
+Layers: `backend`, `frontend`, `infra`. Stack packs: `python`, `django`, `sqlalchemy`, `fastapi`, `vue`, `inertia`, `astro`, `tailwind`, `docker`, `caddy`.
 
 ## Install
 

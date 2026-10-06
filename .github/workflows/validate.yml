@@ -23,3 +23,5 @@ jobs:
           done
       - name: Structural checks
         run: python3 scripts/check-plugin.py
+      - name: Script tests
+        run: python3 -m unittest discover -s scripts -p 'test_*.py'

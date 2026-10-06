@@ -12,6 +12,7 @@ Read these files to find dependencies. Search the project root and each `Layout`
 - `requirements*.txt`
 - `setup.cfg` (`install_requires`)
 - `package.json` (`dependencies`, `devDependencies`)
+- `Dockerfile*`, `docker-compose*.yml`, `compose*.yaml`, `Caddyfile*`: found by file name anywhere in the repo (Glob `**/<name>`), not only at the root. Nothing is parsed. They only suggest stack keys; where a file belongs is decided by the profile's `Layout`.
 
 ## Signals
 
@@ -33,4 +34,5 @@ Match a signal case-insensitively against dependency names. Ignore dependencies 
 | `nuxt` | frontend | `nuxt` |
 | `astro` | frontend | `astro` |
 | `tailwind` | frontend | `tailwindcss` |
-| `docker` | infra | a `Dockerfile` or `docker-compose*.yml` / `compose*.yaml` at the project root |
+| `docker` | infra | a `Dockerfile*` or `docker-compose*.yml` / `compose*.yaml` anywhere in the repo |
+| `caddy` | infra | a `Caddyfile*` anywhere in the repo |
