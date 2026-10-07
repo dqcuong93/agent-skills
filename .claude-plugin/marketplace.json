@@ -1,6 +1,6 @@
 {
   "name": "dqcuong93",
-  "description": "Personal engineering skills: QA/QC review workflows and stack checklists, reusable across projects.",
+  "description": "Personal engineering skills: code review, performance analysis, and pre-commit finishing, driven by a per-project profile and reusable across projects.",
   "owner": {
     "name": "dqcuong93",
     "url": "https://github.com/dqcuong93"
@@ -9,7 +9,7 @@
     {
       "name": "qa",
       "source": "./plugins/qa",
-      "description": "QA/QC review skills driven by a per-project profile (.claude/project-profile.md)."
+      "description": "Review (backend, frontend, infra, docs), performance analysis, and finish skills driven by a per-project profile (.claude/project-profile.md)."
     }
   ]
 }

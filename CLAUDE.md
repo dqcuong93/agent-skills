@@ -2,19 +2,24 @@
 
 Public repo (`github.com/dqcuong93/agent-skills`) of generic skills as a Claude Code plugin marketplace. Layout and usage: `README.md`. Never put project/client names, hosts, credentials, or business rules here; those belong in each project's `.claude/project-profile.md`.
 
-State: `main` is published on GitHub; no tags yet.
+State: `main` is published on GitHub. Release `v0.4.0` carries wave 2 (see Open work).
 
 ## Layout
 
 ```
 .claude-plugin/marketplace.json            marketplace "dqcuong93"
-plugins/qa/.claude-plugin/plugin.json      plugin "qa", version 0.3.0
-plugins/qa/stack-signals.md                manifests + dependency → stack key (shared by both skills)
-plugins/qa/skills/review/                  SKILL.md + references/{backend,frontend}.md + <layer>-<stack>.md packs
+plugins/qa/.claude-plugin/plugin.json      plugin "qa", version 0.4.0
+plugins/qa/stack-signals.md                manifests + dependency → stack key (parsed by scripts/drift.py)
+plugins/qa/scripts/drift.py                STACK/PACK/PROFILE/GAP records and the Packs: line (unit-tested)
+plugins/qa/skills/review/                  SKILL.md + references/<layer>.md, <layer>-<stack>.md packs, scope.md (all)
+plugins/qa/skills/perf/                    SKILL.md + references/<layer>.md, <layer>-<stack>.md
+plugins/qa/skills/finish/                  SKILL.md (calls /qa:review, reads the profile's Finish section)
 plugins/qa/skills/init-profile/            SKILL.md + profile-template.md
 scripts/check-plugin.py                    structural checks (also in CI); reads optional local .banned-words
-.github/workflows/validate.yml             claude plugin validate --strict + check-plugin.py
-docs/specs/, docs/plans/                   design specs and implementation plans
+scripts/test_drift.py                      unit tests for drift.py (also in CI)
+.github/workflows/validate.yml             claude plugin validate --strict, check-plugin.py, unit tests
+docs/USAGE.md                              user guide (README links to it)
+docs/specs/                                design specs with their acceptance results
 ```
 
 ## Before changing a skill
@@ -48,16 +53,9 @@ The deterministic script (`plugins/qa/scripts/drift.py`) has unit tests: `python
 
 ## Open work (priority order)
 
-1. Tag `v0.3.0` (it includes the unreleased `0.2.0` content) and update installs on each machine with `claude plugin update qa@dqcuong93`; wave 1 acceptance is in `docs/specs/2026-10-05-unified-review-design.md` § Results.
+1. Tag `v0.4.0` on the commit that carries `plugin.json` 0.4.0 and update installs on each machine with `claude plugin update qa@dqcuong93`. Tags `v0.3.0` and `v0.3.1` were pushed on earlier commits whose `plugin.json` says 0.2.0 and 0.3.0 and that lack the docs, perf, finish, and all work; do not move them, use `v0.4.0`; wave 1 acceptance is in `docs/specs/2026-10-05-unified-review-design.md` § Results.
 2. Remove the old in-repo QA skills from those projects once Cursor's handling of plugin skills is confirmed; repoint their `finish-change`, agent instructions, and AI docs to `/qa:review`.
-3. Wave 2 cycles, in order (specs and plans in `docs/specs/` and `docs/plans/`, dated 2026-10-06):
-   - 0 layout confirmation in `init-profile`: implemented, accepted, not committed until the owner commits it.
-   - 1 `infra` layer (`docker`, `caddy` packs; `k8s` later): implemented and accepted (results in `docs/specs/2026-10-06-infra-layer-design.md`); not committed until the owner commits it.
-   - 2 `docs` layer (`mkdocs` pack): implemented and accepted (results in `docs/specs/2026-10-07-docs-layer-design.md`); not committed until the owner commits it.
-   - 3 `/qa:perf` as its own skill: implemented and accepted (results in `docs/specs/2026-10-06-perf-skill-design.md`); not committed until the owner commits it.
-   - 4 `all` scope (whole layer or repo): implemented and accepted with caveats (`docs/specs/2026-10-06-all-scope-design.md`); not committed until the owner commits it.
-   - 5 profile lifecycle (`confirmed:`, `plugin:`, `PROFILE` and `GAP` records): implemented (`docs/specs/2026-10-06-profile-lifecycle-design.md`).
-   - 6 `/qa:finish` plugin skill: implemented (`docs/specs/2026-10-06-finish-skill-design.md`); `ui-ux-pro-max` stays an external plugin, named only in a profile.
+3. Wave 2 (cycles 0–6: layout confirmation, `infra`, `docs`, `/qa:perf`, `all`, profile lifecycle, `/qa:finish`) is implemented and accepted with the caveats in each spec under `docs/specs/`. Not yet verified: the `init-profile` write step interactively, `all` on frontend/infra/docs, `/qa:finish`'s interactive question and test-writing paths. `ui-ux-pro-max` stays an external plugin, named only in a profile.
 4. Packs the owner's repos need: `nuxt`, `pyqt`, infra `k8s`.
 5. Profiles for the other projects, porting their project-specific rules out of their in-repo skills.
-6. Community release: React/Next and Node packs, validate `init-profile` research on unfamiliar repos, example output in the README.
+6. Community release: React/Next and Node packs, validate `init-profile` research on unfamiliar repos, example output in `docs/USAGE.md`.
