@@ -1,7 +1,7 @@
 {
   "name": "qa",
   "displayName": "QA/QC",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "description": "QA/QC skills: review, performance analysis, and finish. Generic workflows and stack checklists; project-specific rules come from .claude/project-profile.md.",
   "author": {
     "name": "dqcuong93",

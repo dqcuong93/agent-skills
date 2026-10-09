@@ -28,7 +28,7 @@ To make everyone on a repo use the same version, put this in the repo's `.claude
 ```json
 {
   "extraKnownMarketplaces": {
-    "dqcuong93": { "source": { "source": "github", "repo": "dqcuong93/agent-skills", "ref": "v0.4.0" } }
+    "dqcuong93": { "source": { "source": "github", "repo": "dqcuong93/agent-skills", "ref": "v0.4.1" } }
   },
   "enabledPlugins": { "qa@dqcuong93": true }
 }
@@ -113,7 +113,7 @@ One file per project, facts only. Documentation stays the source of truth: **poi
 ---
 stacks: [python, django, vue]
 confirmed: 2026-10-06        # set by /qa:init-profile
-plugin: 0.4.0                # plugin version it was written with
+plugin: 0.4.1                # plugin version it was written with
 review-after-days: 180
 ---
 

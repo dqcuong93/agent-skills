@@ -90,7 +90,7 @@ Stack signals and the manifest list: `${CLAUDE_PLUGIN_ROOT}/stack-signals.md`.
 
 8. **Look up only with a reason.** Consult sources only when the diff adds or upgrades a dependency, a finding depends on version-specific behaviour, or you are unsure an API behaves as assumed or a library provides something (e.g. whether an icon or helper exists). Order: for whether a library provides something, the installed package first (`node_modules/`, the virtualenv); otherwise official docs (context7 when available), then changelog or migration guide, then community posts only to corroborate. Project docs that describe a library are not a source for it. A finding that relies on a lookup cites the URL.
 
-9. **Docs drift.** If changed behaviour is described in a file under the profile's `Docs to keep in sync`, or in a docstring or comment of the changed code, check they still match.
+9. **Docs drift.** If changed behaviour is described in a file under the profile's `Docs to keep in sync`, or in a docstring or comment of the changed code, check they still match. Matching means opening the code each behaviour sentence describes, not reading the diff: apply `docs.md` § 1 "Behavior claims verified" even when no docs layer is in scope, and list any claim you could not open under **Not checked**.
 
 10. **Grade** each finding (see Severity), then write the output.
 

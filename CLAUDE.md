@@ -2,13 +2,13 @@
 
 Public repo (`github.com/dqcuong93/agent-skills`) of generic skills as a Claude Code plugin marketplace. Layout and usage: `README.md`. Never put project/client names, hosts, credentials, or business rules here; those belong in each project's `.claude/project-profile.md`.
 
-State: `main` is published on GitHub. Release `v0.4.0` carries wave 2 (see Open work).
+State: `main` is published on GitHub. Release `v0.4.1` carries wave 2 plus the doc-claim and unresolved-state checks (see Open work).
 
 ## Layout
 
 ```
 .claude-plugin/marketplace.json            marketplace "dqcuong93"
-plugins/qa/.claude-plugin/plugin.json      plugin "qa", version 0.4.0
+plugins/qa/.claude-plugin/plugin.json      plugin "qa", version 0.4.1
 plugins/qa/stack-signals.md                manifests + dependency → stack key (parsed by scripts/drift.py)
 plugins/qa/scripts/drift.py                STACK/PACK/PROFILE/GAP records and the Packs: line (unit-tested)
 plugins/qa/skills/review/                  SKILL.md + references/<layer>.md, <layer>-<stack>.md packs, scope.md (all)
@@ -53,7 +53,7 @@ The deterministic script (`plugins/qa/scripts/drift.py`) has unit tests: `python
 
 ## Open work (priority order)
 
-1. Tag `v0.4.0` on the commit that carries `plugin.json` 0.4.0 and update installs on each machine with `claude plugin update qa@dqcuong93`. Tags `v0.3.0` and `v0.3.1` were pushed on earlier commits whose `plugin.json` says 0.2.0 and 0.3.0 and that lack the docs, perf, finish, and all work; do not move them, use `v0.4.0`; wave 1 acceptance is in `docs/specs/2026-10-05-unified-review-design.md` § Results.
+1. Tag `v0.4.1` on the commit that carries `plugin.json` 0.4.1 and update installs on each machine with `claude plugin update qa@dqcuong93`. Tags `v0.3.0` and `v0.3.1` were pushed on earlier commits whose `plugin.json` says 0.2.0 and 0.3.0 and that lack the docs, perf, finish, and all work; do not move them, use `v0.4.1`; wave 1 acceptance is in `docs/specs/2026-10-05-unified-review-design.md` § Results.
 2. Remove the old in-repo QA skills from those projects once Cursor's handling of plugin skills is confirmed; repoint their `finish-change`, agent instructions, and AI docs to `/qa:review`.
 3. Wave 2 (cycles 0–6: layout confirmation, `infra`, `docs`, `/qa:perf`, `all`, profile lifecycle, `/qa:finish`) is implemented and accepted with the caveats in each spec under `docs/specs/`. Not yet verified: the `init-profile` write step interactively, `all` on frontend/infra/docs, `/qa:finish`'s interactive question and test-writing paths. `ui-ux-pro-max` stays an external plugin, named only in a profile.
 4. Packs the owner's repos need: `nuxt`, `pyqt`, infra `k8s`.

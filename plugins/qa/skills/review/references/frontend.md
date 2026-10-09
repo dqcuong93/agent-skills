@@ -15,6 +15,11 @@ Framework-agnostic. Report only items the change affects.
 - [ ] **No duplicate or waterfall requests**: Independent calls run in parallel; the same data is not fetched twice for one view.
 - [ ] **Errors handled**: A failed request shows a user-facing message and leaves the UI usable; no unhandled promise rejection.
 - [ ] **Loading and empty states**: Async views show a loading indicator and an empty state with a next action.
+- [ ] **Unresolved state**: Content that depends on state fetched at load (session, user, permissions, a flag) shows neutral content or a skeleton until that state is known. A `v-else` or default branch that also covers "not loaded yet" flashes the wrong content (a signed-in user sees the guest copy first), and a placeholder that grows when the state arrives shifts the layout.
+- [ ] **Failed check is not "no"**: A request that fails (network, 5xx) is not treated as a negative answer (not signed in, no permission). Show an error or retry, not the restricted view.
+- [ ] **Expired session**: When the server rejects a request for auth after the page loaded (401), the user sees a clear message and a way to sign in again, not the raw framework error text or a generic failure.
+- [ ] **Copy matches the user**: Text, hints, and counts name only what the current user can do or see. A notice that lists categories or features the user's role cannot reach is wrong for that user.
+- [ ] **Values captured once**: A date, time, or other value read once at setup or module scope and used on a page that stays open (presets, "today", ranges) goes stale; compute it where it is used.
 - [ ] **Double submit**: Submit buttons are disabled while a request is in flight and re-enabled on both success and failure.
 
 ## 3. Accessibility
