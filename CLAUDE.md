@@ -2,13 +2,13 @@
 
 Public repo (`github.com/dqcuong93/agent-skills`) of generic skills as a Claude Code plugin marketplace. Layout and usage: `README.md`. Never put project/client names, hosts, credentials, or business rules here; those belong in each project's `.claude/project-profile.md`.
 
-State: `main` is published on GitHub. Release `v0.4.1` carries wave 2 plus the doc-claim and unresolved-state checks (see Open work).
+State: `main` is published on GitHub. Release `v0.5.0` adds the PyQt pack. `v0.4.1` carries wave 2 plus the doc-claim and unresolved-state checks (see Open work).
 
 ## Layout
 
 ```
 .claude-plugin/marketplace.json            marketplace "dqcuong93"
-plugins/qa/.claude-plugin/plugin.json      plugin "qa", version 0.4.1
+plugins/qa/.claude-plugin/plugin.json      plugin "qa", version 0.5.0
 plugins/qa/stack-signals.md                manifests + dependency → stack key (parsed by scripts/drift.py)
 plugins/qa/scripts/drift.py                STACK/PACK/PROFILE/GAP records and the Packs: line (unit-tested)
 plugins/qa/skills/review/                  SKILL.md + references/<layer>.md, <layer>-<stack>.md packs, scope.md (all)
@@ -53,9 +53,9 @@ The deterministic script (`plugins/qa/scripts/drift.py`) has unit tests: `python
 
 ## Open work (priority order)
 
-1. Tag `v0.4.1` on the commit that carries `plugin.json` 0.4.1 and update installs on each machine with `claude plugin update qa@dqcuong93`. Tags `v0.3.0` and `v0.3.1` were pushed on earlier commits whose `plugin.json` says 0.2.0 and 0.3.0 and that lack the docs, perf, finish, and all work; do not move them, use `v0.4.1`. Wave 1 acceptance is in `docs/acceptance.md`.
+1. Update installs to `v0.5.0` with `claude plugin update qa@dqcuong93`. Tags `v0.3.0` and `v0.3.1` were pushed on earlier commits whose `plugin.json` says 0.2.0 and 0.3.0 and that lack the docs, perf, finish, and all work; do not move them. Wave 1 acceptance is in `docs/acceptance.md`.
 2. Remove the old in-repo QA skills from those projects once Cursor's handling of plugin skills is confirmed; repoint their `finish-change`, agent instructions, and AI docs to `/qa:review`.
-3. Wave 2 (layout confirmation, `infra`, `docs`, `/qa:perf`, `all`, profile lifecycle, `/qa:finish`) is implemented. The record and the open holes are in `docs/acceptance.md`. Not yet verified: the `init-profile` write step (including `confirmed:` and `plugin:`), a layout line that joins paths with `·` or whose notes contain commas, `all` on frontend/infra/docs and `--units critical`, `/qa:finish`'s interactive question, test-writing, `reviewers:` lines, and `/qa:perf` offer, and `/qa:perf`'s `measured` label. `ui-ux-pro-max` stays an external plugin, named only in a profile.
-4. Packs the owner's repos need: `nuxt`, infra `k8s`. (`pyqt` written; not yet run headless against a planted-bug clone.)
+3. Wave 2 (layout confirmation, `infra`, `docs`, `/qa:perf`, `all`, profile lifecycle, `/qa:finish`) is implemented. The record and the open holes are in `docs/acceptance.md`. Not yet verified: a first-run `/qa:init-profile` write from scratch (the update path wrote once, with `bypassPermissions`), a layout line that joins paths with `·` or whose notes contain commas, `all` on frontend/infra/docs and `--units critical`, `/qa:finish`'s interactive question, test-writing, `reviewers:` lines, and `/qa:perf` offer, and `/qa:perf`'s `measured` label. `ui-ux-pro-max` stays an external plugin, named only in a profile.
+4. Packs the owner's repos need: `nuxt`, infra `k8s`. (`pyqt` has one headless run, 3 of 3 planted bugs; a second run is still open.)
 5. Profiles for the other projects, porting their project-specific rules out of their in-repo skills.
 6. Community release: React/Next and Node packs, validate `init-profile` research on unfamiliar repos, example output in `docs/USAGE.md`.

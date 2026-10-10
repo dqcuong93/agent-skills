@@ -1,7 +1,7 @@
 {
   "name": "qa",
   "displayName": "QA/QC",
-  "version": "0.4.1",
+  "version": "0.5.0",
   "description": "QA/QC skills: review, performance analysis, and finish. Generic workflows and stack checklists; project-specific rules come from .claude/project-profile.md.",
   "author": {
     "name": "dqcuong93",
@@ -9,5 +9,5 @@
   },
   "repository": "https://github.com/dqcuong93/agent-skills",
   "license": "MIT",
-  "keywords": ["qa", "code-review", "checklist", "django", "fastapi", "sqlalchemy", "python", "vue", "inertia", "astro", "tailwind", "frontend", "infra", "docker", "caddy", "docs", "mkdocs", "performance", "finish"]
+  "keywords": ["qa", "code-review", "checklist", "django", "fastapi", "sqlalchemy", "python", "pyqt", "vue", "inertia", "astro", "tailwind", "frontend", "infra", "docker", "caddy", "docs", "mkdocs", "performance", "finish"]
 }
