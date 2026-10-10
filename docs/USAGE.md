@@ -14,7 +14,7 @@ The plugin reviews code for you. It knows how to review (workflow, severity, che
 
 \* Measured on small diffs with Claude Sonnet; yours will differ with diff size and model.
 
-The review covers four layers: `backend`, `frontend`, `infra`, `docs`. Stack packs add rules for `python`, `django`, `sqlalchemy`, `fastapi`, `vue`, `inertia`, `astro`, `tailwind`, `docker`, `caddy`, `mkdocs`.
+The review covers four layers: `backend`, `frontend`, `infra`, `docs`. Stack packs add rules for `python`, `django`, `sqlalchemy`, `fastapi`, `pyqt`, `vue`, `inertia`, `astro`, `tailwind`, `docker`, `caddy`, `mkdocs`. Desktop Qt UIs (`pyqt`) are reviewed as `backend`; `frontend` is for web pages.
 
 ## Install and update
 

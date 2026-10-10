@@ -31,6 +31,7 @@ Load only what step 4 selects. A pack's stack key is the part of its name after 
 | [references/backend-django.md](references/backend-django.md) | backend in scope and `django` in stacks |
 | [references/backend-sqlalchemy.md](references/backend-sqlalchemy.md) | backend in scope and `sqlalchemy` in stacks |
 | [references/backend-fastapi.md](references/backend-fastapi.md) | backend in scope and `fastapi` in stacks |
+| [references/backend-pyqt.md](references/backend-pyqt.md) | backend in scope and `pyqt` in stacks |
 | [references/frontend.md](references/frontend.md) | a frontend file is in scope |
 | [references/frontend-vue.md](references/frontend-vue.md) | frontend in scope and `vue` in stacks |
 | [references/frontend-inertia.md](references/frontend-inertia.md) | frontend in scope and `inertia` in stacks |

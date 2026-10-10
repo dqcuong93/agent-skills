@@ -56,11 +56,11 @@ Machines without a GitHub SSH key: set `CLAUDE_CODE_PLUGIN_PREFER_HTTPS=1`.
 
 ## Status
 
-`v0.4.1`. (`v0.3.0` and `v0.3.1` were tagged on earlier commits that do not match their `plugin.json`; use `v0.4.1`.) `v0.4.1` tightens the docs and frontend checks after a side-by-side run against three real changes: documented behaviour must be checked against the code, a changed contract is searched across all docs, and frontend gets unresolved-state, failed-check, expired-session, role-aware-copy, and stale-value checks. On those runs the review found the same important defects as the in-repo skills it replaces at about half the tokens, and fewer maintainability nits. Every skill was tested by running it headless against real or cloned projects with planted bugs and comparing with the in-repo skill it replaces, with Claude Sonnet and one to a few runs per case, so treat the results as indicative, not as rates. Results are in [`docs/specs/`](docs/specs/), each spec ending with its own caveats.
+`v0.4.1`. (`v0.3.0` and `v0.3.1` were tagged on earlier commits that do not match their `plugin.json`; use `v0.4.1`.) `v0.4.1` tightens the docs and frontend checks after a side-by-side run against three real changes: documented behaviour must be checked against the code, a changed contract is searched across all docs, and frontend gets unresolved-state, failed-check, expired-session, role-aware-copy, and stale-value checks. On those runs the review found the same important defects as the in-repo skills it replaces at about half the tokens, and fewer maintainability nits. Every skill was tested by running it headless against real or cloned projects with planted bugs and comparing with the in-repo skill it replaces, with Claude Sonnet and one to a few runs per case, so treat the results as indicative, not as rates. The record is [`docs/acceptance.md`](docs/acceptance.md).
 
 Known gaps:
 
-- Packs for `nuxt`, `pyqt`, and `k8s` are not written.
+- Packs for `nuxt` and `k8s` are not written.
 - `/qa:review all` is tested on one backend (one orchestrator run found 7 of 7 planted bugs; it costs several times a diff review). Frontend, infra, and docs in `all` mode are untested.
 - The `Packs:` line says which packs a review should load, not that the model read them.
 - `/qa:init-profile` is tested headless up to the profile write, which headless runs cannot do (`.claude/` is protected); the write step is untested.

@@ -19,7 +19,7 @@ scripts/check-plugin.py                    structural checks (also in CI); reads
 scripts/test_drift.py                      unit tests for drift.py (also in CI)
 .github/workflows/validate.yml             claude plugin validate --strict, check-plugin.py, unit tests
 docs/USAGE.md                              user guide (README links to it)
-docs/specs/                                design specs with their acceptance results
+docs/acceptance.md                         headless acceptance results and what is still unverified
 ```
 
 ## Before changing a skill
@@ -53,9 +53,9 @@ The deterministic script (`plugins/qa/scripts/drift.py`) has unit tests: `python
 
 ## Open work (priority order)
 
-1. Tag `v0.4.1` on the commit that carries `plugin.json` 0.4.1 and update installs on each machine with `claude plugin update qa@dqcuong93`. Tags `v0.3.0` and `v0.3.1` were pushed on earlier commits whose `plugin.json` says 0.2.0 and 0.3.0 and that lack the docs, perf, finish, and all work; do not move them, use `v0.4.1`; wave 1 acceptance is in `docs/specs/2026-10-05-unified-review-design.md` § Results.
+1. Tag `v0.4.1` on the commit that carries `plugin.json` 0.4.1 and update installs on each machine with `claude plugin update qa@dqcuong93`. Tags `v0.3.0` and `v0.3.1` were pushed on earlier commits whose `plugin.json` says 0.2.0 and 0.3.0 and that lack the docs, perf, finish, and all work; do not move them, use `v0.4.1`. Wave 1 acceptance is in `docs/acceptance.md`.
 2. Remove the old in-repo QA skills from those projects once Cursor's handling of plugin skills is confirmed; repoint their `finish-change`, agent instructions, and AI docs to `/qa:review`.
-3. Wave 2 (cycles 0–6: layout confirmation, `infra`, `docs`, `/qa:perf`, `all`, profile lifecycle, `/qa:finish`) is implemented and accepted with the caveats in each spec under `docs/specs/`. Not yet verified: the `init-profile` write step interactively, `all` on frontend/infra/docs, `/qa:finish`'s interactive question and test-writing paths. `ui-ux-pro-max` stays an external plugin, named only in a profile.
-4. Packs the owner's repos need: `nuxt`, `pyqt`, infra `k8s`.
+3. Wave 2 (layout confirmation, `infra`, `docs`, `/qa:perf`, `all`, profile lifecycle, `/qa:finish`) is implemented. The record and the open holes are in `docs/acceptance.md`. Not yet verified: the `init-profile` write step (including `confirmed:` and `plugin:`), a layout line that joins paths with `·` or whose notes contain commas, `all` on frontend/infra/docs and `--units critical`, `/qa:finish`'s interactive question, test-writing, `reviewers:` lines, and `/qa:perf` offer, and `/qa:perf`'s `measured` label. `ui-ux-pro-max` stays an external plugin, named only in a profile.
+4. Packs the owner's repos need: `nuxt`, infra `k8s`. (`pyqt` written; not yet run headless against a planted-bug clone.)
 5. Profiles for the other projects, porting their project-specific rules out of their in-repo skills.
 6. Community release: React/Next and Node packs, validate `init-profile` research on unfamiliar repos, example output in `docs/USAGE.md`.
