@@ -35,7 +35,7 @@ For everyone working in a repo, commit this to the repo's `.claude/settings.json
 {
   "extraKnownMarketplaces": {
     "dqcuong93": {
-      "source": { "source": "github", "repo": "dqcuong93/agent-skills", "ref": "v0.5.0" }
+      "source": { "source": "github", "repo": "dqcuong93/agent-skills", "ref": "v0.5.1" }
     }
   },
   "enabledPlugins": { "qa@dqcuong93": true }
@@ -56,7 +56,7 @@ Machines without a GitHub SSH key: set `CLAUDE_CODE_PLUGIN_PREFER_HTTPS=1`.
 
 ## Status
 
-`v0.5.0`. (`v0.3.0` and `v0.3.1` were tagged on earlier commits that do not match their `plugin.json`; use `v0.5.0`.) `v0.5.0` adds a PyQt/PySide pack. One headless run on a planted-bug clone found 3 of 3. `v0.4.1` tightens the docs and frontend checks after a side-by-side run against three real changes: documented behaviour must be checked against the code, a changed contract is searched across all docs, and frontend gets unresolved-state, failed-check, expired-session, role-aware-copy, and stale-value checks. On those runs the review found the same important defects as the in-repo skills it replaces at about half the tokens, and fewer maintainability nits. Every skill was tested by running it headless against real or cloned projects with planted bugs and comparing with the in-repo skill it replaces, with Claude Sonnet and one to a few runs per case, so treat the results as indicative, not as rates. The record is [`docs/acceptance.md`](docs/acceptance.md).
+`v0.5.1`. (`v0.3.0` and `v0.3.1` were tagged on earlier commits that do not match their `plugin.json`; use `v0.5.1`.) `v0.5.1` adds backend checks for stored keys that change after the data is written and for failure handlers that call what just raised. `v0.5.0` adds a PyQt/PySide pack. One headless run on a planted-bug clone found 3 of 3. `v0.4.1` tightens the docs and frontend checks after a side-by-side run against three real changes: documented behaviour must be checked against the code, a changed contract is searched across all docs, and frontend gets unresolved-state, failed-check, expired-session, role-aware-copy, and stale-value checks. On those runs the review found the same important defects as the in-repo skills it replaces at about half the tokens, and fewer maintainability nits. Every skill was tested by running it headless against real or cloned projects with planted bugs and comparing with the in-repo skill it replaces, with Claude Sonnet and one to a few runs per case, so treat the results as indicative, not as rates. The record is [`docs/acceptance.md`](docs/acceptance.md).
 
 Known gaps:
 

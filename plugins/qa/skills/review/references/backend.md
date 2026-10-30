@@ -26,6 +26,8 @@ Language- and framework-agnostic. Report only items the change affects.
 - [ ] **Concurrency**: State-machine transitions and counters guarded (row lock, conditional update, unique constraint) against concurrent writers.
 - [ ] **Idempotency**: Retried operations (jobs, webhooks, batch inserts, resumable work) are safe to run twice.
 - [ ] **Resume safety**: Interrupted long-running work can be picked up again without skipping or duplicating items.
+- [ ] **Stored keys stay stable**: A value that names stored data (file path, storage key, URL, external id) does not change after the data is written, or the change handles the edit (move, rename, or refuse it). A key that is frozen in part but rebuilt from a field users can still edit stops finding its data after the edit.
+- [ ] **Failure paths do not fail again**: Code in `except`, rollback, and cleanup handlers does not call what just raised, or guards that call. Otherwise the handler raises from inside itself, the rest of the cleanup is skipped, and the caller sees a crash instead of the handled failure.
 
 ## 4. API / interface boundary
 
